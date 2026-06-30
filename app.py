@@ -33,6 +33,105 @@ st.set_page_config(
 )
 
 # ============================================================
+# עיצוב מקצועי - RTL מלא + כרטיסי KPI + פלטת צבעים כהה
+# ============================================================
+st.markdown("""
+<style>
+    html, body, [class*="css"] {
+        direction: rtl;
+        text-align: right;
+        font-family: 'Segoe UI', 'Heebo', Arial, sans-serif;
+    }
+    .main .block-container {
+        padding-top: 1.5rem;
+        padding-bottom: 2rem;
+        max-width: 1400px;
+    }
+    /* כותרת ראשית */
+    h1 {
+        font-size: 2.1rem !important;
+        font-weight: 700 !important;
+        background: linear-gradient(90deg, #0ea5e9, #0284c7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0 !important;
+    }
+    /* כרטיסי KPI */
+    div[data-testid="stMetric"] {
+        background: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 14px;
+        padding: 1.1rem 1.2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        transition: border-color 0.15s ease;
+    }
+    div[data-testid="stMetric"]:hover {
+        border-color: #0ea5e9;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 0.85rem !important;
+        color: #9ca3af !important;
+        font-weight: 500 !important;
+        justify-content: flex-end !important;
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 1.65rem !important;
+        font-weight: 700 !important;
+        direction: ltr;
+        text-align: right !important;
+    }
+    div[data-testid="stMetricDelta"] {
+        justify-content: flex-end !important;
+        direction: ltr;
+    }
+    /* תיבת טקסט - watchlist */
+    .stTextArea textarea {
+        text-align: left;
+        direction: ltr;
+        font-family: 'Consolas', monospace;
+        background: #0f172a !important;
+        border: 1px solid #1e293b !important;
+        border-radius: 10px !important;
+        color: #38bdf8 !important;
+    }
+    /* טאבים */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        direction: rtl;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px 8px 0 0;
+        padding: 10px 20px;
+        font-weight: 600;
+    }
+    /* טבלאות */
+    div[data-testid="stDataFrame"] {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #1f2937;
+    }
+    /* divider */
+    hr {
+        margin: 1.2rem 0 !important;
+        border-color: #1f2937 !important;
+    }
+    /* תיבת אזהרה/מידע */
+    div[data-testid="stAlert"] {
+        border-radius: 10px;
+        text-align: right;
+    }
+    /* כותרות משנה */
+    h2, h3 {
+        text-align: right !important;
+    }
+    /* טוגל ו-selectbox מימין */
+    .stToggle, .stSelectbox {
+        direction: rtl;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ============================================================
 # חיבורים - Alpaca + Supabase
 # ============================================================
 @st.cache_resource
@@ -147,7 +246,7 @@ def get_tracking_start():
 # ============================================================
 # כותרת + רענון אוטומטי
 # ============================================================
-col_title, col_refresh = st.columns([4, 1])
+col_refresh, col_title = st.columns([1, 4])
 with col_title:
     st.title("🌊 Nautilus — Live Trading Dashboard")
     st.caption(f"מתעדכן אוטומטית | עדכון אחרון: {datetime.now().strftime('%H:%M:%S')}")
@@ -214,7 +313,7 @@ daily_pl = account["equity"] - account["last_equity"]
 daily_pl_pct = (daily_pl / account["last_equity"] * 100) if account["last_equity"] else 0
 open_pl = positions_df["Unrealized P&L ($)"].sum() if not positions_df.empty else 0
 
-k1, k2, k3, k4, k5 = st.columns(5)
+k5, k4, k3, k2, k1 = st.columns(5)
 k1.metric("💰 שווי תיק כולל", f"${account['portfolio_value']:,.2f}")
 k2.metric(
     "📈 רווח/הפסד יומי (חשבון)",
