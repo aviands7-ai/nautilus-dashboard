@@ -29,105 +29,130 @@ st.set_page_config(
     page_title="Nautilus Live Dashboard",
     page_icon="🌊",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # ============================================================
-# עיצוב מקצועי - RTL מלא + כרטיסי KPI + פלטת צבעים כהה
+# עיצוב - RTL + פלטה אחידה (תואם config.toml theme=dark)
 # ============================================================
 st.markdown("""
 <style>
-    html, body, [class*="css"] {
-        direction: rtl;
-        text-align: right;
-        font-family: 'Segoe UI', 'Heebo', Arial, sans-serif;
-    }
+    * { direction: rtl; }
+    .stApp { direction: rtl; }
+
     .main .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 2rem;
-        max-width: 1400px;
+        max-width: 1280px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
     }
-    /* כותרת ראשית */
+
+    h1, h2, h3, h4, p, span, label, div {
+        text-align: right;
+    }
+
     h1 {
-        font-size: 2.1rem !important;
+        font-size: 1.9rem !important;
         font-weight: 700 !important;
-        background: linear-gradient(90deg, #0ea5e9, #0284c7);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0 !important;
+        color: #f1f5f9 !important;
+        margin-bottom: 0.2rem !important;
+        letter-spacing: -0.01em;
     }
-    /* כרטיסי KPI */
-    div[data-testid="stMetric"] {
-        background: #111827;
-        border: 1px solid #1f2937;
-        border-radius: 14px;
-        padding: 1.1rem 1.2rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        transition: border-color 0.15s ease;
-    }
-    div[data-testid="stMetric"]:hover {
-        border-color: #0ea5e9;
-    }
-    div[data-testid="stMetricLabel"] {
+
+    [data-testid="stCaptionContainer"] {
+        color: #64748b !important;
         font-size: 0.85rem !important;
-        color: #9ca3af !important;
+    }
+
+    h2 {
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        color: #cbd5e1 !important;
+        margin-top: 0 !important;
+    }
+
+    /* כרטיסי KPI - אחיד עם הרקע */
+    div[data-testid="stMetric"] {
+        background: #131c2e;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+    }
+    div[data-testid="stMetricLabel"] p {
+        font-size: 0.8rem !important;
+        color: #94a3b8 !important;
         font-weight: 500 !important;
+        text-align: right !important;
         justify-content: flex-end !important;
     }
     div[data-testid="stMetricValue"] {
-        font-size: 1.65rem !important;
+        font-size: 1.5rem !important;
         font-weight: 700 !important;
+        color: #f1f5f9 !important;
         direction: ltr;
         text-align: right !important;
+        justify-content: flex-end !important;
     }
     div[data-testid="stMetricDelta"] {
         justify-content: flex-end !important;
         direction: ltr;
     }
-    /* תיבת טקסט - watchlist */
+
+    /* תיבת watchlist */
     .stTextArea textarea {
-        text-align: left;
-        direction: ltr;
-        font-family: 'Consolas', monospace;
-        background: #0f172a !important;
+        text-align: left !important;
+        direction: ltr !important;
+        font-family: 'SFMono-Regular', Consolas, monospace !important;
+        font-size: 0.9rem !important;
+        background: #0b1120 !important;
         border: 1px solid #1e293b !important;
         border-radius: 10px !important;
         color: #38bdf8 !important;
     }
+    .stTextArea textarea:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 1px #3b82f6 !important;
+    }
+
     /* טאבים */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 4px;
-        direction: rtl;
+        gap: 6px;
+        border-bottom: 1px solid #1e293b;
     }
     .stTabs [data-baseweb="tab"] {
+        background: transparent;
         border-radius: 8px 8px 0 0;
-        padding: 10px 20px;
-        font-weight: 600;
+        padding: 8px 18px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #94a3b8;
     }
+    .stTabs [aria-selected="true"] {
+        color: #3b82f6 !important;
+        border-bottom: 2px solid #3b82f6;
+    }
+
     /* טבלאות */
     div[data-testid="stDataFrame"] {
-        border-radius: 12px;
+        border-radius: 10px;
+        border: 1px solid #1e293b;
         overflow: hidden;
-        border: 1px solid #1f2937;
     }
-    /* divider */
-    hr {
-        margin: 1.2rem 0 !important;
-        border-color: #1f2937 !important;
-    }
-    /* תיבת אזהרה/מידע */
+
+    /* alerts */
     div[data-testid="stAlert"] {
         border-radius: 10px;
         text-align: right;
     }
-    /* כותרות משנה */
-    h2, h3 {
-        text-align: right !important;
-    }
-    /* טוגל ו-selectbox מימין */
-    .stToggle, .stSelectbox {
-        direction: rtl;
-    }
+
+    /* divider */
+    hr { border-color: #1e293b !important; margin: 1.5rem 0 !important; }
+
+    /* כפתורים וטוגלים מיושרים נכון */
+    .stToggle, .stSelectbox, .stButton { direction: rtl; }
+    .stSelectbox > div { text-align: right; }
+
+    /* הסתרת תפריט/footer של Streamlit לתחושת אפליקציה אמיתית */
+    #MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden; height: 0; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -248,8 +273,13 @@ def get_tracking_start():
 # ============================================================
 col_refresh, col_title = st.columns([1, 4])
 with col_title:
-    st.title("🌊 Nautilus — Live Trading Dashboard")
-    st.caption(f"מתעדכן אוטומטית | עדכון אחרון: {datetime.now().strftime('%H:%M:%S')}")
+    st.markdown("""
+    <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:1.9rem;">🌊</span>
+        <h1 style="margin:0; padding:0;">Nautilus — Live Trading Dashboard</h1>
+    </div>
+    """, unsafe_allow_html=True)
+    st.caption(f"מתעדכן אוטומטית · עדכון אחרון {datetime.now().strftime('%H:%M:%S')}")
 with col_refresh:
     auto_refresh = st.toggle("רענון אוטומטי", value=True)
     refresh_sec = st.selectbox("מרווח (שנ')", [10, 15, 30, 60], index=1, label_visibility="collapsed")
@@ -259,7 +289,12 @@ st.divider()
 # ============================================================
 # רשימת טיקרים פעילה — מסננת מה-Nautilus מתוך כל הפוזיציות
 # ============================================================
-st.subheader("🎯 רשימת טיקרים פעילה")
+st.markdown("""
+<div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+    <span style="font-size:1.1rem;">🎯</span>
+    <h2 style="margin:0;">רשימת טיקרים פעילה</h2>
+</div>
+""", unsafe_allow_html=True)
 st.caption("עדכן כל פעם שמשנים alert ב-TradingView. הדשבורד יסנן רק פוזיציות עם הסימבולים האלה.")
 
 if "watchlist_text" not in st.session_state:
@@ -313,16 +348,29 @@ daily_pl = account["equity"] - account["last_equity"]
 daily_pl_pct = (daily_pl / account["last_equity"] * 100) if account["last_equity"] else 0
 open_pl = positions_df["Unrealized P&L ($)"].sum() if not positions_df.empty else 0
 
+def kpi_card(label, value, color="#f1f5f9", sub=None):
+    sub_html = f'<div style="font-size:0.78rem; color:#64748b; margin-top:4px; direction:ltr; text-align:right;">{sub}</div>' if sub else ""
+    st.markdown(f"""
+    <div style="background:#131c2e; border:1px solid #1e293b; border-radius:12px; padding:1rem 1.1rem; height:100%;">
+        <div style="font-size:0.8rem; color:#94a3b8; font-weight:500; margin-bottom:6px;">{label}</div>
+        <div style="font-size:1.5rem; font-weight:700; color:{color}; direction:ltr; text-align:right;">{value}</div>
+        {sub_html}
+    </div>
+    """, unsafe_allow_html=True)
+
 k5, k4, k3, k2, k1 = st.columns(5)
-k1.metric("💰 שווי תיק כולל", f"${account['portfolio_value']:,.2f}")
-k2.metric(
-    "📈 רווח/הפסד יומי (חשבון)",
-    f"${daily_pl:,.2f}",
-    f"{daily_pl_pct:+.2f}%",
-)
-k3.metric("🔓 רווח/הפסד פתוח (Nautilus)", f"${open_pl:,.2f}")
-k4.metric("📊 פוזיציות Nautilus פתוחות", len(positions_df))
-k5.metric("💵 כוח קנייה", f"${account['buying_power']:,.0f}")
+with k1:
+    kpi_card("שווי תיק כולל", f"${account['portfolio_value']:,.2f}")
+with k2:
+    pl_color = "#4ade80" if daily_pl >= 0 else "#f87171"
+    kpi_card("רווח/הפסד יומי (חשבון)", f"${daily_pl:,.2f}", color=pl_color, sub=f"{daily_pl_pct:+.2f}%")
+with k3:
+    open_color = "#4ade80" if open_pl >= 0 else "#f87171"
+    kpi_card("רווח/הפסד פתוח (Nautilus)", f"${open_pl:,.2f}", color=open_color)
+with k4:
+    kpi_card("פוזיציות Nautilus פתוחות", str(len(positions_df)))
+with k5:
+    kpi_card("כוח קנייה", f"${account['buying_power']:,.0f}")
 
 if tracking_start:
     tracking_dt = pd.to_datetime(tracking_start)
