@@ -397,7 +397,7 @@ with tab1:
             color = "#16a34a" if val >= 0 else "#dc2626"
             return f"color: {color}; font-weight: bold"
 
-        styled = positions_df.style.applymap(
+        styled = positions_df.style.map(
             color_pl, subset=["Unrealized P&L ($)", "Unrealized P&L (%)"]
         ).format({
             "Avg Entry": "${:.2f}",
