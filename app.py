@@ -151,6 +151,15 @@ st.markdown("""
     .stToggle, .stSelectbox, .stButton { direction: rtl; }
     .stSelectbox > div { text-align: right; }
 
+    /* יישור אזור הרענון לגובה הכותרת */
+    div[data-testid="column"]:has(.stToggle) {
+        padding-top: 0.6rem;
+    }
+    .stToggle label p {
+        font-size: 0.85rem !important;
+        color: #94a3b8 !important;
+    }
+
     /* הסתרת תפריט/footer של Streamlit לתחושת אפליקציה אמיתית */
     #MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden; height: 0; }
 </style>
@@ -237,9 +246,15 @@ def fetch_dashboard_log(limit=500):
 def log_snapshot(watchlist_symbols, positions_df):
     """
     שומר snapshot של מצב הפוזיציות המסוננות לטבלה העצמית.
-    נקרא פעם בכל ריענון — בונה היסטוריה רציפה משלנו, ללא תלות
-    ב-trade_journal שלא מתויג לפי source.
+    נקרא לכל היותר פעם בדקה (לא בכל רענון של 15 שניות) כדי לא
+    להציף את היומן ברשומות זהות כמעט.
     """
+    last_log_time = st.session_state.get("last_log_time")
+    now_ts = time.time()
+    if last_log_time and (now_ts - last_log_time) < 60:
+        return
+    st.session_state["last_log_time"] = now_ts
+
     supabase = get_supabase_client()
     now = datetime.now(timezone.utc).isoformat()
     total_pl = float(positions_df["Unrealized P&L ($)"].sum()) if not positions_df.empty else 0.0
@@ -271,7 +286,7 @@ def get_tracking_start():
 # ============================================================
 # כותרת + רענון אוטומטי
 # ============================================================
-col_refresh, col_title = st.columns([1, 4])
+col_refresh, col_title = st.columns([1.3, 3.5])
 with col_title:
     title_html = (
         "<div style='display:flex; align-items:center; gap:10px;'>"
@@ -282,8 +297,11 @@ with col_title:
     st.markdown(title_html, unsafe_allow_html=True)
     st.caption(f"מתעדכן אוטומטית · עדכון אחרון {datetime.now().strftime('%H:%M:%S')}")
 with col_refresh:
-    auto_refresh = st.toggle("רענון אוטומטי", value=True)
-    refresh_sec = st.selectbox("מרווח (שנ')", [10, 15, 30, 60], index=1, label_visibility="collapsed")
+    rc1, rc2 = st.columns([2, 1])
+    with rc1:
+        auto_refresh = st.toggle("רענון אוטומטי", value=True)
+    with rc2:
+        refresh_sec = st.selectbox("מרווח", [10, 15, 30, 60], index=1, label_visibility="collapsed")
 
 st.divider()
 
