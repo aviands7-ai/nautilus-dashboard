@@ -273,12 +273,13 @@ def get_tracking_start():
 # ============================================================
 col_refresh, col_title = st.columns([1, 4])
 with col_title:
-    st.markdown("""
-    <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-size:1.9rem;">🌊</span>
-        <h1 style="margin:0; padding:0;">Nautilus — Live Trading Dashboard</h1>
-    </div>
-    """, unsafe_allow_html=True)
+    title_html = (
+        "<div style='display:flex; align-items:center; gap:10px;'>"
+        "<span style='font-size:1.9rem;'>🌊</span>"
+        "<h1 style='margin:0; padding:0;'>Nautilus — Live Trading Dashboard</h1>"
+        "</div>"
+    )
+    st.markdown(title_html, unsafe_allow_html=True)
     st.caption(f"מתעדכן אוטומטית · עדכון אחרון {datetime.now().strftime('%H:%M:%S')}")
 with col_refresh:
     auto_refresh = st.toggle("רענון אוטומטי", value=True)
@@ -289,12 +290,13 @@ st.divider()
 # ============================================================
 # רשימת טיקרים פעילה — מסננת מה-Nautilus מתוך כל הפוזיציות
 # ============================================================
-st.markdown("""
-<div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
-    <span style="font-size:1.1rem;">🎯</span>
-    <h2 style="margin:0;">רשימת טיקרים פעילה</h2>
-</div>
-""", unsafe_allow_html=True)
+watchlist_title_html = (
+    "<div style='display:flex; align-items:center; gap:8px; margin-bottom:2px;'>"
+    "<span style='font-size:1.1rem;'>🎯</span>"
+    "<h2 style='margin:0;'>רשימת טיקרים פעילה</h2>"
+    "</div>"
+)
+st.markdown(watchlist_title_html, unsafe_allow_html=True)
 st.caption("עדכן כל פעם שמשנים alert ב-TradingView. הדשבורד יסנן רק פוזיציות עם הסימבולים האלה.")
 
 if "watchlist_text" not in st.session_state:
@@ -349,14 +351,15 @@ daily_pl_pct = (daily_pl / account["last_equity"] * 100) if account["last_equity
 open_pl = positions_df["Unrealized P&L ($)"].sum() if not positions_df.empty else 0
 
 def kpi_card(label, value, color="#f1f5f9", sub=None):
-    sub_html = f'<div style="font-size:0.78rem; color:#64748b; margin-top:4px; direction:ltr; text-align:right;">{sub}</div>' if sub else ""
-    st.markdown(f"""
-    <div style="background:#131c2e; border:1px solid #1e293b; border-radius:12px; padding:1rem 1.1rem; height:100%;">
-        <div style="font-size:0.8rem; color:#94a3b8; font-weight:500; margin-bottom:6px;">{label}</div>
-        <div style="font-size:1.5rem; font-weight:700; color:{color}; direction:ltr; text-align:right;">{value}</div>
-        {sub_html}
-    </div>
-    """, unsafe_allow_html=True)
+    sub_html = f"<div style='font-size:0.78rem; color:#64748b; margin-top:4px; direction:ltr; text-align:right;'>{sub}</div>" if sub else ""
+    card_html = (
+        "<div style='background:#131c2e; border:1px solid #1e293b; border-radius:12px; padding:1rem 1.1rem; height:100%;'>"
+        f"<div style='font-size:0.8rem; color:#94a3b8; font-weight:500; margin-bottom:6px;'>{label}</div>"
+        f"<div style='font-size:1.5rem; font-weight:700; color:{color}; direction:ltr; text-align:right;'>{value}</div>"
+        f"{sub_html}"
+        "</div>"
+    )
+    st.markdown(card_html, unsafe_allow_html=True)
 
 k5, k4, k3, k2, k1 = st.columns(5)
 with k1:
@@ -393,45 +396,36 @@ with tab1:
         # מיון לפי P&L
         positions_df = positions_df.sort_values("Unrealized P&L ($)", ascending=False)
 
-        rows_html = ""
+        row_parts = []
         for _, row in positions_df.iterrows():
             pl_color = "#4ade80" if row["Unrealized P&L ($)"] >= 0 else "#f87171"
             side_color = "#4ade80" if row["Side"] == "Long" else "#f87171"
             side_bg = "rgba(74,222,128,0.12)" if row["Side"] == "Long" else "rgba(248,113,113,0.12)"
-            rows_html += f"""
-            <tr style="border-bottom:1px solid #1e293b;">
-                <td style="padding:10px 12px; font-weight:600; text-align:right;">{row['Symbol']}</td>
-                <td style="padding:10px 12px; text-align:right;">
-                    <span style="background:{side_bg}; color:{side_color}; font-size:0.78rem; padding:3px 10px; border-radius:6px; font-weight:600;">{row['Side']}</span>
-                </td>
-                <td style="padding:10px 12px; text-align:right; direction:ltr;">{row['Qty']:,.0f}</td>
-                <td style="padding:10px 12px; text-align:right; direction:ltr;">${row['Avg Entry']:,.2f}</td>
-                <td style="padding:10px 12px; text-align:right; direction:ltr;">${row['Current Price']:,.2f}</td>
-                <td style="padding:10px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:700;">${row['Unrealized P&L ($)']:,.2f}</td>
-                <td style="padding:10px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:600;">{row['Unrealized P&L (%)']:+.2f}%</td>
-            </tr>
-            """
+            row_parts.append(
+                "<tr style='border-bottom:1px solid #1e293b;'>"
+                f"<td style='padding:10px 12px; font-weight:600; text-align:right;'>{row['Symbol']}</td>"
+                f"<td style='padding:10px 12px; text-align:right;'><span style='background:{side_bg}; color:{side_color}; font-size:0.78rem; padding:3px 10px; border-radius:6px; font-weight:600;'>{row['Side']}</span></td>"
+                f"<td style='padding:10px 12px; text-align:right; direction:ltr;'>{row['Qty']:,.0f}</td>"
+                f"<td style='padding:10px 12px; text-align:right; direction:ltr;'>${row['Avg Entry']:,.2f}</td>"
+                f"<td style='padding:10px 12px; text-align:right; direction:ltr;'>${row['Current Price']:,.2f}</td>"
+                f"<td style='padding:10px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:700;'>${row['Unrealized P&L ($)']:,.2f}</td>"
+                f"<td style='padding:10px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:600;'>{row['Unrealized P&L (%)']:+.2f}%</td>"
+                "</tr>"
+            )
+        rows_html = "".join(row_parts)
 
-        table_html = f"""
-        <div style="border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
-        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
-            <thead>
-                <tr style="background:#0b1120; border-bottom:1px solid #1e293b;">
-                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">סימבול</th>
-                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">כיוון</th>
-                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">כמות</th>
-                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">כניסה</th>
-                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">נוכחי</th>
-                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">רווח/הפסד</th>
-                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">אחוז</th>
-                </tr>
-            </thead>
-            <tbody>
-                {rows_html}
-            </tbody>
-        </table>
-        </div>
-        """
+        header_cells = "".join(
+            f"<th style='padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;'>{label}</th>"
+            for label in ["סימבול", "כיוון", "כמות", "כניסה", "נוכחי", "רווח/הפסד", "אחוז"]
+        )
+
+        table_html = (
+            "<div style='border:1px solid #1e293b; border-radius:10px; overflow:hidden;'>"
+            "<table style='width:100%; border-collapse:collapse; font-size:0.9rem;'>"
+            f"<thead><tr style='background:#0b1120; border-bottom:1px solid #1e293b;'>{header_cells}</tr></thead>"
+            f"<tbody>{rows_html}</tbody>"
+            "</table></div>"
+        )
         st.markdown(table_html, unsafe_allow_html=True)
 
         st.write("")
@@ -456,36 +450,32 @@ with tab2:
         display_log["logged_at"] = pd.to_datetime(display_log["logged_at"])
         display_log = display_log.sort_values("logged_at", ascending=False)
 
-        log_rows_html = ""
+        log_row_parts = []
         for _, row in display_log.iterrows():
             pl_val = row["total_unrealized_pl"]
             pl_color = "#4ade80" if pl_val >= 0 else "#f87171"
-            log_rows_html += f"""
-            <tr style="border-bottom:1px solid #1e293b;">
-                <td style="padding:8px 12px; text-align:right; direction:ltr; color:#cbd5e1; font-size:0.85rem;">{row['logged_at'].strftime('%d/%m %H:%M:%S')}</td>
-                <td style="padding:8px 12px; text-align:right; direction:ltr;">{row['open_positions_count']}</td>
-                <td style="padding:8px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:600;">${pl_val:,.2f}</td>
-                <td style="padding:8px 12px; text-align:left; direction:ltr; color:#64748b; font-size:0.8rem; font-family:monospace;">{row['watchlist']}</td>
-            </tr>
-            """
+            log_row_parts.append(
+                "<tr style='border-bottom:1px solid #1e293b;'>"
+                f"<td style='padding:8px 12px; text-align:right; direction:ltr; color:#cbd5e1; font-size:0.85rem;'>{row['logged_at'].strftime('%d/%m %H:%M:%S')}</td>"
+                f"<td style='padding:8px 12px; text-align:right; direction:ltr;'>{row['open_positions_count']}</td>"
+                f"<td style='padding:8px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:600;'>${pl_val:,.2f}</td>"
+                f"<td style='padding:8px 12px; text-align:left; direction:ltr; color:#64748b; font-size:0.8rem; font-family:monospace;'>{row['watchlist']}</td>"
+                "</tr>"
+            )
+        log_rows_html = "".join(log_row_parts)
 
-        log_table_html = f"""
-        <div style="border:1px solid #1e293b; border-radius:10px; overflow:hidden; max-height:420px; overflow-y:auto;">
-        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
-            <thead>
-                <tr style="background:#0b1120; border-bottom:1px solid #1e293b;">
-                    <th style="padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;">זמן</th>
-                    <th style="padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;">פוזיציות</th>
-                    <th style="padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;">רווח/הפסד פתוח</th>
-                    <th style="padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;">רשימת טיקרים</th>
-                </tr>
-            </thead>
-            <tbody>
-                {log_rows_html}
-            </tbody>
-        </table>
-        </div>
-        """
+        log_header_cells = "".join(
+            f"<th style='padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;'>{label}</th>"
+            for label in ["זמן", "פוזיציות", "רווח/הפסד פתוח", "רשימת טיקרים"]
+        )
+
+        log_table_html = (
+            "<div style='border:1px solid #1e293b; border-radius:10px; overflow:hidden; max-height:420px; overflow-y:auto;'>"
+            "<table style='width:100%; border-collapse:collapse; font-size:0.9rem;'>"
+            f"<thead><tr style='background:#0b1120; border-bottom:1px solid #1e293b;'>{log_header_cells}</tr></thead>"
+            f"<tbody>{log_rows_html}</tbody>"
+            "</table></div>"
+        )
         st.markdown(log_table_html, unsafe_allow_html=True)
         st.caption(f"מציג {len(display_log)} רשומות יומן, מ-{display_log['logged_at'].min().strftime('%d/%m %H:%M')} עד {display_log['logged_at'].max().strftime('%d/%m %H:%M')}")
 
