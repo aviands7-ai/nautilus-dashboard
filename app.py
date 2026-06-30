@@ -393,32 +393,59 @@ with tab1:
         # מיון לפי P&L
         positions_df = positions_df.sort_values("Unrealized P&L ($)", ascending=False)
 
-        def color_pl(val):
-            color = "#16a34a" if val >= 0 else "#dc2626"
-            return f"color: {color}; font-weight: bold"
+        rows_html = ""
+        for _, row in positions_df.iterrows():
+            pl_color = "#4ade80" if row["Unrealized P&L ($)"] >= 0 else "#f87171"
+            side_color = "#4ade80" if row["Side"] == "Long" else "#f87171"
+            side_bg = "rgba(74,222,128,0.12)" if row["Side"] == "Long" else "rgba(248,113,113,0.12)"
+            rows_html += f"""
+            <tr style="border-bottom:1px solid #1e293b;">
+                <td style="padding:10px 12px; font-weight:600; text-align:right;">{row['Symbol']}</td>
+                <td style="padding:10px 12px; text-align:right;">
+                    <span style="background:{side_bg}; color:{side_color}; font-size:0.78rem; padding:3px 10px; border-radius:6px; font-weight:600;">{row['Side']}</span>
+                </td>
+                <td style="padding:10px 12px; text-align:right; direction:ltr;">{row['Qty']:,.0f}</td>
+                <td style="padding:10px 12px; text-align:right; direction:ltr;">${row['Avg Entry']:,.2f}</td>
+                <td style="padding:10px 12px; text-align:right; direction:ltr;">${row['Current Price']:,.2f}</td>
+                <td style="padding:10px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:700;">${row['Unrealized P&L ($)']:,.2f}</td>
+                <td style="padding:10px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:600;">{row['Unrealized P&L (%)']:+.2f}%</td>
+            </tr>
+            """
 
-        styled = positions_df.style.map(
-            color_pl, subset=["Unrealized P&L ($)", "Unrealized P&L (%)"]
-        ).format({
-            "Avg Entry": "${:.2f}",
-            "Current Price": "${:.2f}",
-            "Market Value": "${:,.2f}",
-            "Unrealized P&L ($)": "${:,.2f}",
-            "Unrealized P&L (%)": "{:.2f}%",
-            "Qty": "{:.0f}",
-        })
-        st.dataframe(styled, use_container_width=True, hide_index=True, height=420)
+        table_html = f"""
+        <div style="border:1px solid #1e293b; border-radius:10px; overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+                <tr style="background:#0b1120; border-bottom:1px solid #1e293b;">
+                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">סימבול</th>
+                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">כיוון</th>
+                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">כמות</th>
+                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">כניסה</th>
+                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">נוכחי</th>
+                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">רווח/הפסד</th>
+                    <th style="padding:10px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem;">אחוז</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rows_html}
+            </tbody>
+        </table>
+        </div>
+        """
+        st.markdown(table_html, unsafe_allow_html=True)
+
+        st.write("")
 
         # פילוח Long/Short
-        c1, c2 = st.columns(2)
+        c2, c1 = st.columns(2)
         with c1:
             long_count = (positions_df["Side"] == "Long").sum()
             short_count = (positions_df["Side"] == "Short").sum()
-            st.metric("Long / Short", f"{long_count} / {short_count}")
+            kpi_card("Long / Short", f"{long_count} / {short_count}")
         with c2:
             winners = (positions_df["Unrealized P&L ($)"] > 0).sum()
             losers = (positions_df["Unrealized P&L ($)"] < 0).sum()
-            st.metric("ברווח / בהפסד", f"{winners} / {losers}")
+            kpi_card("ברווח / בהפסד", f"{winners} / {losers}")
 
 # --- טאב 2: היסטוריית מעקב (יומן עצמי) ---
 with tab2:
@@ -429,17 +456,37 @@ with tab2:
         display_log["logged_at"] = pd.to_datetime(display_log["logged_at"])
         display_log = display_log.sort_values("logged_at", ascending=False)
 
-        st.dataframe(
-            display_log[["logged_at", "open_positions_count", "total_unrealized_pl", "watchlist"]].rename(columns={
-                "logged_at": "זמן",
-                "open_positions_count": "מס' פוזיציות",
-                "total_unrealized_pl": "רווח/הפסד פתוח ($)",
-                "watchlist": "רשימת טיקרים",
-            }),
-            use_container_width=True,
-            hide_index=True,
-            height=400,
-        )
+        log_rows_html = ""
+        for _, row in display_log.iterrows():
+            pl_val = row["total_unrealized_pl"]
+            pl_color = "#4ade80" if pl_val >= 0 else "#f87171"
+            log_rows_html += f"""
+            <tr style="border-bottom:1px solid #1e293b;">
+                <td style="padding:8px 12px; text-align:right; direction:ltr; color:#cbd5e1; font-size:0.85rem;">{row['logged_at'].strftime('%d/%m %H:%M:%S')}</td>
+                <td style="padding:8px 12px; text-align:right; direction:ltr;">{row['open_positions_count']}</td>
+                <td style="padding:8px 12px; text-align:right; direction:ltr; color:{pl_color}; font-weight:600;">${pl_val:,.2f}</td>
+                <td style="padding:8px 12px; text-align:left; direction:ltr; color:#64748b; font-size:0.8rem; font-family:monospace;">{row['watchlist']}</td>
+            </tr>
+            """
+
+        log_table_html = f"""
+        <div style="border:1px solid #1e293b; border-radius:10px; overflow:hidden; max-height:420px; overflow-y:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+                <tr style="background:#0b1120; border-bottom:1px solid #1e293b;">
+                    <th style="padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;">זמן</th>
+                    <th style="padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;">פוזיציות</th>
+                    <th style="padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;">רווח/הפסד פתוח</th>
+                    <th style="padding:8px 12px; text-align:right; color:#94a3b8; font-weight:600; font-size:0.8rem; position:sticky; top:0; background:#0b1120;">רשימת טיקרים</th>
+                </tr>
+            </thead>
+            <tbody>
+                {log_rows_html}
+            </tbody>
+        </table>
+        </div>
+        """
+        st.markdown(log_table_html, unsafe_allow_html=True)
         st.caption(f"מציג {len(display_log)} רשומות יומן, מ-{display_log['logged_at'].min().strftime('%d/%m %H:%M')} עד {display_log['logged_at'].max().strftime('%d/%m %H:%M')}")
 
 # --- טאב 3: סטטיסטיקות ---
@@ -451,10 +498,13 @@ with tab3:
         display_log["logged_at"] = pd.to_datetime(display_log["logged_at"])
         display_log = display_log.sort_values("logged_at")
 
-        s1, s2, s3 = st.columns(3)
-        s1.metric("נקודות מדידה ביומן", len(display_log))
-        s2.metric("רווח/הפסד פתוח שיא", f"${display_log['total_unrealized_pl'].max():,.2f}")
-        s3.metric("רווח/הפסד פתוח שפל", f"${display_log['total_unrealized_pl'].min():,.2f}")
+        s3, s2, s1 = st.columns(3)
+        with s1:
+            kpi_card("נקודות מדידה ביומן", str(len(display_log)))
+        with s2:
+            kpi_card("רווח/הפסד פתוח שיא", f"${display_log['total_unrealized_pl'].max():,.2f}", color="#4ade80")
+        with s3:
+            kpi_card("רווח/הפסד פתוח שפל", f"${display_log['total_unrealized_pl'].min():,.2f}", color="#f87171")
 
         st.markdown("**רווח/הפסד פתוח לאורך זמן (Nautilus בלבד)**")
         chart_data = display_log.set_index("logged_at")["total_unrealized_pl"]
