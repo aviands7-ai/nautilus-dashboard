@@ -3,3 +3,4 @@ supabase>=2.0
 alpaca-py>=0.20
 pandas>=2.0
 plotly>=5.18
+tzdata>=2024.1
