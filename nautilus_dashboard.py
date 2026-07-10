@@ -71,41 +71,86 @@ ALPACA_PAPER   = _get_secret("ALPACA_PAPER", "true").lower() != "false"
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
     :root {
-        --bg:        #0d1117;
-        --panel:     #161b22;
-        --border:    #21262d;
-        --ink:       #e6edf3;
-        --muted:     #7d8590;
-        --cyan:      #2f9e9e;
-        --amber:     #d9a441;
-        --green:     #3fb950;
-        --red:       #f85149;
+        --bg:        #FBFAF7;   /* paper white */
+        --panel:     #FFFFFF;
+        --panel-alt: #F4F1EB;   /* warm off-white for secondary panels */
+        --border:    #E8E4DC;   /* hairline */
+        --ink:       #1A2332;   /* deep navy-slate, not black */
+        --muted:     #7A8494;
+        --brass:     #B8873D;   /* nautical instrument brass — the signature */
+        --brass-lt:  #F0E6D2;
+        --green:     #2E7D6B;   /* muted teal */
+        --red:       #D2544B;   /* coral */
     }
     .stApp { background: var(--bg); }
-    section[data-testid="stSidebar"] { background: var(--panel); border-right: 1px solid var(--border); }
-    h1, h2, h3 { color: var(--ink); font-family: 'Inter', system-ui, sans-serif; letter-spacing: -0.01em; }
-    .metric-num { font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+    section[data-testid="stSidebar"] {
+        background: var(--panel-alt);
+        border-right: 1px solid var(--border);
+    }
+    section[data-testid="stSidebar"] * { color: var(--ink) !important; }
+
+    /* Headings: Fraunces display, used with restraint */
+    h1, h2, h3, h4 {
+        color: var(--ink);
+        font-family: 'Fraunces', Georgia, serif;
+        letter-spacing: -0.015em; font-weight: 600;
+    }
+    .stApp, .stApp p, .stApp span, .stApp label, .stApp div {
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    /* The signature: brass rule under the main title */
+    .brass-rule {
+        height: 2px; width: 100%;
+        background: linear-gradient(90deg, var(--brass) 0%, var(--brass) 42%, transparent 100%);
+        margin: 2px 0 18px 0;
+    }
+
     .panel {
-        background: var(--panel); border: 1px solid var(--border);
-        border-radius: 10px; padding: 18px 20px; margin-bottom: 14px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--brass);
+        border-radius: 6px; padding: 20px 22px; margin-bottom: 14px;
+        box-shadow: 0 1px 2px rgba(26,35,50,0.04);
+        color: var(--ink);
     }
     .panel-title {
-        color: var(--muted); font-size: 12px; text-transform: uppercase;
-        letter-spacing: 0.08em; margin-bottom: 12px; font-weight: 600;
+        color: var(--muted); font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.1em; margin-bottom: 8px; font-weight: 600;
     }
-    .stat-big { font-size: 30px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-    .pos { color: var(--green); }
-    .neg { color: var(--red); }
-    .neutral { color: var(--ink); }
+    /* Numbers always monospace — a trading tool lives on its digits */
+    .stat-big {
+        font-size: 30px; font-weight: 700;
+        font-family: 'JetBrains Mono', 'SF Mono', monospace;
+        color: var(--ink); letter-spacing: -0.02em;
+    }
+    .pos { color: var(--green) !important; }
+    .neg { color: var(--red) !important; }
+    .neutral { color: var(--ink) !important; }
+
     .pill {
-        display: inline-block; padding: 2px 10px; border-radius: 999px;
-        font-size: 11px; font-weight: 600; font-family: monospace;
+        display: inline-block; padding: 3px 11px; border-radius: 4px;
+        font-size: 11px; font-weight: 600;
+        font-family: 'JetBrains Mono', monospace; letter-spacing: 0.03em;
     }
-    .pill-live { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
-    .pill-stale { background: rgba(248,81,73,0.12); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
-    .pill-warn { background: rgba(217,164,65,0.12); color: var(--amber); border: 1px solid rgba(217,164,65,0.3); }
-    div[data-testid="stDataFrame"] { border: 1px solid var(--border); border-radius: 8px; }
+    .pill-live  { background: rgba(46,125,107,0.12); color: var(--green); border: 1px solid rgba(46,125,107,0.28); }
+    .pill-stale { background: rgba(210,84,75,0.10);  color: var(--red);   border: 1px solid rgba(210,84,75,0.28); }
+    .pill-warn  { background: var(--brass-lt);       color: var(--brass); border: 1px solid rgba(184,135,61,0.35); }
+
+    /* Tabs: brass underline on the active tab */
+    button[data-baseweb="tab"] { font-family: 'Inter', sans-serif; font-weight: 500; }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: var(--brass) !important;
+        border-bottom-color: var(--brass) !important;
+    }
+
+    div[data-testid="stDataFrame"] {
+        border: 1px solid var(--border); border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(26,35,50,0.04);
+    }
+    div[data-testid="stMetricValue"] { font-family: 'JetBrains Mono', monospace; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -340,7 +385,8 @@ with st.sidebar:
 # ============================================================
 # HEADER + TOP-LINE ACCOUNT STRIP
 # ============================================================
-st.markdown("## Control Room")
+st.markdown("## Nautilus Control Room")
+st.markdown('<div class="brass-rule"></div>', unsafe_allow_html=True)
 
 acct, acct_err = fetch_alpaca_account()
 
@@ -409,7 +455,7 @@ with tab_live:
                 "Qty": "{:.0f}", "Avg Entry": "${:.2f}", "Current": "${:.2f}",
                 "Mkt Value": "${:,.2f}", "Unreal P&L": "${:,.2f}", "Unreal P&L %": "{:.2f}%",
             }).map(
-                lambda v: f"color: {'#3fb950' if v > 0 else '#f85149'}" if isinstance(v, (int, float)) else "",
+                lambda v: f"color: {'#2E7D6B' if v > 0 else '#D2544B'}; font-weight: 600" if isinstance(v, (int, float)) else "",
                 subset=["Unreal P&L", "Unreal P&L %"],
             )
             st.dataframe(styled, use_container_width=True, hide_index=True)
@@ -527,14 +573,15 @@ with tab_equity:
         fig.add_trace(go.Scatter(
             x=eq_df["logged_at"], y=eq_df["total_unrealized_pl"],
             mode="lines", name="Unrealized P&L",
-            line=dict(color="#2f9e9e", width=2),
-            fill="tozeroy", fillcolor="rgba(47,158,158,0.08)",
+            line=dict(color="#B8873D", width=2.2),
+            fill="tozeroy", fillcolor="rgba(184,135,61,0.08)",
         ))
         fig.update_layout(
             height=380, margin=dict(l=10, r=10, t=30, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#7d8590"),
-            xaxis=dict(gridcolor="#21262d"), yaxis=dict(gridcolor="#21262d", title="Unrealized P&L ($)"),
+            font=dict(color="#7A8494", family="Inter"),
+            xaxis=dict(gridcolor="#E8E4DC", zerolinecolor="#E8E4DC"),
+            yaxis=dict(gridcolor="#E8E4DC", zerolinecolor="#E8E4DC", title="Unrealized P&L ($)"),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -542,13 +589,14 @@ with tab_equity:
         fig2 = go.Figure()
         fig2.add_trace(go.Scatter(
             x=eq_df["logged_at"], y=eq_df["open_positions_count"],
-            mode="lines", line=dict(color="#d9a441", width=1.5, shape="hv"),
+            mode="lines", line=dict(color="#2E7D6B", width=1.8, shape="hv"),
         ))
         fig2.update_layout(
             height=200, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#7d8590"),
-            xaxis=dict(gridcolor="#21262d"), yaxis=dict(gridcolor="#21262d"),
+            font=dict(color="#7A8494", family="Inter"),
+            xaxis=dict(gridcolor="#E8E4DC", zerolinecolor="#E8E4DC"),
+            yaxis=dict(gridcolor="#E8E4DC", zerolinecolor="#E8E4DC"),
         )
         st.plotly_chart(fig2, use_container_width=True)
 
